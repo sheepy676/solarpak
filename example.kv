@@ -1,0 +1,18 @@
+// All paths relative to the kv file
+solarpak // required
+{
+	// Sets vpk to pack into 1 vpk
+	// Warns if vpk doesn't have _dir at the end
+	$singlevpk 1
+	// Sets the vpk version, default 1 acceptable values are 1 or 2
+	$version 1
+	// Packs a directory
+	$packdir "materials" 
+	$packdir "maps"
+	$packdir "models"
+	$packdir "scripts"
+	$packdir "resource"
+	// Packs a singular file
+	$packfile "addonimage.jpeg"
+	$packfile "addoninfo.txt"
+}
