@@ -10,9 +10,15 @@ This was made to easily and quickly package a VPK for easy distribution for a sm
 ## Usage
 See [example.kv](example.kv1) for an example kv file.
 
-Example usage command:
+### Example command usage
+
+Basic Usage:
 ```shell
 solarpak ./example.kv
+```
+Specify VPK output directory:
+```shell
+solarpak -o ./output ./example.kv
 ```
 A list of Keys accepted:
 |Key | input|
