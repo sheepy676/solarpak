@@ -8,4 +8,4 @@ This was made to easily and quickly package a VPK for easy distribution for a sm
 - [argparse](https://github.com/p-ranav/argparse)
 
 ## Usage
-Check [example.kv](example.kv) for an example kv file.
+See [example.kv](example.kv) for an example kv file.
