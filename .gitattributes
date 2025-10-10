@@ -1,0 +1,6 @@
+# kv
+*.kv text diff=txt
+
+# sources
+*.cpp text diff=cpp
+*.h   text diff=cpp
