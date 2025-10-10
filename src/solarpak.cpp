@@ -32,9 +32,9 @@ struct packList_s {
 };
 
 #define KVCOMMANDHELP \
-		"Command:		Input:\n" \
+		"Key:			Input:\n" \
 		"$name			[string]\n" \
-		"$singlevpk		[true/false]\n" \
+		"$singlevpk		[0/1]\n" \
 		"$version		[1/2]\n" \
 		"$pack			[path]\n"
 
@@ -42,6 +42,7 @@ int main(int argc, char* argv[])
 {
 	packList_s packList;
 	std::filesystem::path cwd;
+	std::string outputPath;
 	int i;
 
 	cwd = std::filesystem::current_path();
@@ -49,6 +50,10 @@ int main(int argc, char* argv[])
 	argparse::ArgumentParser program(PROGRAM_NAME, PROGRAM_VERSION);
 	program.add_argument("KVPATH")
 		.help("Path to kvfile");
+
+	program.add_argument("-o", "--output")
+		.metavar("PATH")
+		.help("Specify directory to output VPK to");
 
 	program.add_description(PROGRAM_DESC);
 
@@ -159,7 +164,26 @@ int main(int argc, char* argv[])
 			This may cause issues if the vpk is more than 4gb.\n"
 		);
 
-	std::string packName = packList.name + ".vpk";
+	outputPath = "";
+
+	// Get and Set output path
+	if (program.is_used("--output"))
+	{
+		outputPath = program.get("--output");
+		if (!outputPath.ends_with("/")) {
+			outputPath.append("/");
+		}
+		if (!std::filesystem::exists(outputPath))
+		{
+			std::filesystem::create_directory(outputPath);
+		}
+		if (!std::filesystem::is_directory(outputPath)) {
+			printf("Error: output must be a directory!\n");
+			exit(1);
+		}
+	}
+
+	std::string packName = outputPath + packList.name + ".vpk";
 	printf("Creating: %s\n", packName.c_str());
 	std::unique_ptr<PackFile> vpkFile = VPK::create(packName, packList.version);
 
