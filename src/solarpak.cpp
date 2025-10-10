@@ -31,6 +31,13 @@ struct packList_s {
 	int version = 1;
 };
 
+#define KVCOMMANDHELP \
+		"Command:		Input:\n" \
+		"$name			[string]\n" \
+		"$singlevpk		[true/false]\n" \
+		"$version		[1/2]\n" \
+		"$pack			[path]\n"
+
 int main(int argc, char* argv[])
 {
 	packList_s packList;
@@ -45,15 +52,7 @@ int main(int argc, char* argv[])
 
 	program.add_description(PROGRAM_DESC);
 
-	program.add_epilog(
-		"KV Commands:\n"
-		"Command:		Input:\n"	
-		"$name			[string]\n"
-		"$singlevpk		[true/false]\n"
-		"$version		[1/2]\n"
-		"$packdir		[path]\n"
-		"$packfile		[path]\n"	
-	);
+	program.add_epilog("KV Commands:\n" KVCOMMANDHELP);
 
 	try {
 		program.parse_args(argc, argv);
@@ -107,35 +106,50 @@ int main(int argc, char* argv[])
 		{
 			// Make sure $version is 1 or 2
 			if (vpkKey.getValue<int>() > 2 || vpkKey.getValue<int>() < 1) {
-				printf("Error: $version can't be greater than 2 and less than 1");
+				printf("Error: $version can't be greater than 2 and less than 1\n");
 				exit(1);
 			}
 
 			packList.version = vpkKey.getValue<int>();
 			continue;
 		}
-		else if (!strcmp(token.c_str(), "$packdir"))
+		else if (!strcmp(token.c_str(), "$pack"))
 		{
-			auto pos = packList.packDirsPath.begin();
-			auto pos2 = packList.packDirs.begin();
-			packList.packDirsPath.insert(std::next(pos, 0), pathToKVDir + value);
-			packList.packDirs.insert(std::next(pos2, 0), value);
-			continue;
+			if (std::filesystem::is_regular_file(pathToKVDir + value))
+			{
+				auto pos = packList.packFilesPath.begin();
+				auto pos2 = packList.packFiles.begin();
+				packList.packFilesPath.insert(std::next(pos, 0),pathToKVDir + value);
+				packList.packFiles.insert(std::next(pos2, 0),value);
+				continue;
+			}
+			else if (std::filesystem::is_directory(pathToKVDir + value))
+			{
+				auto pos = packList.packDirsPath.begin();
+				auto pos2 = packList.packDirs.begin();
+				packList.packDirsPath.insert(std::next(pos, 0), pathToKVDir + value);
+				packList.packDirs.insert(std::next(pos2, 0), value);
+				continue;
+			}
+			else
+			{
+				printf("Error: %s is not a file or directory!\n", value.c_str());
+				exit(1);
+			}
 		}
-		else if (!strcmp(token.c_str(), "$packfile"))
+		else
 		{
-			auto pos = packList.packFilesPath.begin();
-			auto pos2 = packList.packFiles.begin();
-			packList.packFilesPath.insert(std::next(pos, 0),pathToKVDir + value);
-			packList.packFiles.insert(std::next(pos2, 0),value);
-			continue;
+			printf("Error: %s is not a supported command!\nAccepted commands are:\n", token.c_str());
+			printf(KVCOMMANDHELP);
+			exit(2);
 		}
 	}
 
 	// Make sure there is a name specified
 	if (packList.name == "")
 	{
-		printf("No vpkname specified!\nPlease add $name \"name\" to the kv file");
+		printf("Error: No vpkname specified!\nPlease add $name \"name\" to the kv file\n");
+		printf(KVCOMMANDHELP);
 		return 1;
 	}
 
