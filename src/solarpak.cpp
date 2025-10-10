@@ -173,8 +173,7 @@ int main(int argc, char* argv[])
 		if (!outputPath.ends_with("/")) {
 			outputPath.append("/");
 		}
-		if (!std::filesystem::exists(outputPath))
-		{
+		if (!std::filesystem::exists(outputPath)) {
 			std::filesystem::create_directory(outputPath);
 		}
 		if (!std::filesystem::is_directory(outputPath)) {
