@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "solarpak-windows-${{ matrix.build_type }}"
-          path: ${{ env.BUILD_DIR }}/solarpak.exe
+          path: ${{ env.BUILDDIR }}/solarpak.exe
           retention-days: 3
 
   build-ubuntu:
@@ -66,11 +66,11 @@ jobs:
           -S ${{ github.workspace }}
 
       - name: Build
-        run: cmake --build ${{ env.BUILDDIR }} --config ${{ matrix.build_type }}
+        run: cmake --build ${{ env.BUILDDIR }} --config ${{ matrix.build_type }} -- -j$(nproc)
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: "solarpak-windows-${{ matrix.build_type }}"
-          path: ${{ env.BUILD_DIR }}/solarpak
+          name: "solarpak-linux-${{ matrix.build_type }}"
+          path: ${{ env.BUILDDIR }}/solarpak
           retention-days: 3
