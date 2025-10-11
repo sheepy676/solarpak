@@ -5,6 +5,7 @@ project(solarpak
 	DESCRIPTION "A CLI tool to create a VPK from a kv file."
 )
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 set(SOURCEPP_LIBS_START_ENABLED OFF CACHE INTERNAL "" FORCE)
@@ -29,14 +30,18 @@ execute_process(
 
 configure_file("${CMAKE_SOURCE_DIR}/src/config.h.in" "${CMAKE_SOURCE_DIR}/src/config.h")
 
-add_executable(solarpak
+add_executable(${PROJECT_NAME}
 	"${CMAKE_SOURCE_DIR}/src/solarpak.cpp"
 	"${CMAKE_SOURCE_DIR}/src/config.h"
 )
 
-target_link_libraries(solarpak PRIVATE
+target_link_libraries(${PROJECT_NAME} PRIVATE
 	sourcepp::kvpp
 	sourcepp::vpkpp
 	sourcepp::fspp
 	argparse
 )
+
+if(MSVC)
+	set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
+endif()

@@ -1,0 +1,76 @@
+nmae: Build
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+
+env:
+  BUILDDIR: "${{ github.workspace }}/build"
+
+jobs:
+  build-windows:
+    strategy:
+      matrix:
+        build_type: [Release]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with: 
+          submodules: recursive
+
+      - name: Configure msvc
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          spectre: true
+      
+      - name: Configure Cmake
+        run: >
+          cmake -G "Ninja"
+          -B ${{ env.BUILDDIR }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -S ${{ github.workspace }}
+
+      - name: Build
+        run: cmake --build ${{ env.BUILDDIR }} --config ${{ matrix.build_type }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "solarpak-windows-${{ matrix.build_type }}"
+          path: ${{ env.BUILD_DIR }}/solarpak.exe
+          retention-days: 3
+
+  build-ubuntu:
+    strategy:
+      matrix:
+        build_type: [Release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with: 
+          submodules: recursive
+      
+      - name: Configure Cmake
+        run: >
+          cmake -G "Ninja"
+          -B ${{ env.BUILDDIR }}
+          -DCMAKE_C_COMPILER="gcc"
+          -DCMAKE_CXX_COMPILER="g++"
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -S ${{ github.workspace }}
+
+      - name: Build
+        run: cmake --build ${{ env.BUILDDIR }} --config ${{ matrix.build_type }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "solarpak-windows-${{ matrix.build_type }}"
+          path: ${{ env.BUILD_DIR }}/solarpak
+          retention-days: 3
