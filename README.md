@@ -3,6 +3,13 @@ A CLI tool to create a VPK from a kv file.
 
 This was made to easily and quickly package a VPK for easy distribution for a small Alien Swarm: Reactive Drop workshop campaign I am working on. I decided to relase it in-case others find it useful.
 
+---
+### Supported pack formats
+* vpk
+* zip
+* pak
+  * Quake
+
 ## Dependencies
 - [sourcepp](https://github.com/craftablescience/sourcepp)
 - [argparse](https://github.com/p-ranav/argparse)
@@ -27,4 +34,4 @@ A list of Keys accepted:
 |$singlevpk | [0/1]|
 |$version |   [1/2]|
 |$pack | 	  [path]|
-
+|$type |	  [format]|

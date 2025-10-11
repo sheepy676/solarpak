@@ -21,12 +21,19 @@ using namespace vpkpp;
 using namespace kvpp;
 using namespace fspp;
 
+enum packType {
+	vpk = 0,
+	zip,
+	pak,
+};
+
 struct packList_s {
 	std::string name;
 	std::vector<std::string> packFiles;
 	std::vector<std::string> packFilesPath;
 	std::vector<std::string> packDirs;
 	std::vector<std::string> packDirsPath;
+	packType type = vpk;
 	bool singlevpk = false;
 	int version = 1;
 };
@@ -36,14 +43,92 @@ struct packList_s {
 		"$name			[string]\n" \
 		"$singlevpk		[0/1]\n" \
 		"$version		[1/2]\n" \
-		"$pack			[path]\n"
+		"$pack			[path]\n" \
+		"$type			[format]\n"
+
+#define SUPPORTEDTYPES \
+		"Supported types:\n" \
+		"vpk\n" \
+		"zip\n" \
+		"pak\n"
+
+static bool pack(packList_s packList, std::string outputPath)
+{
+	std::string packName;
+	std::unique_ptr<PackFile> packFile;
+	EntryOptions options;
+	int i;
+
+
+	switch (packList.type)
+	{
+	case vpk: {
+		packName = outputPath + packList.name + vpkpp::VPK_EXTENSION.data();
+		packFile = VPK::create(packName, packList.version);
+		options.vpk_saveToDirectory = packList.singlevpk;
+		break;
+	}
+	case zip: {
+		packName = outputPath + packList.name + vpkpp::ZIP_EXTENSION.data();
+		packFile = ZIP::create(packName);
+		break;
+	}
+	case pak: {
+		packName = outputPath + packList.name + vpkpp::PAK_EXTENSION.data();
+		packFile = PAK::create(packName, PAK::Type::PAK);
+		break;
+	}
+	}
+
+
+	printf("Creating: %s\n", packName.c_str());
+	printf("Packing Files:\n");
+
+	// Iterate through packFiles and packDirs and put them into the type specified
+	i = 0;
+	while (i < packList.packFiles.size())
+	{
+		if (!std::filesystem::exists(packList.packFilesPath[i])) {
+			printf("Error: '%s' Does not exist!\n", packList.packFiles[i].c_str());
+			return false;
+		}
+		if (!std::filesystem::is_regular_file(packList.packFilesPath[i])) {
+			printf("Error: '%s' Is not a file!\n", packList.packFiles[i].c_str());
+			return false;
+		}
+		packFile->addEntry(packList.packFiles[i], packList.packFilesPath[i], options);
+		std::cout << "- " << packList.packFiles[i] << std::endl;
+		i++;
+	}
+
+	printf("Packing Directories:\n");
+
+	i = 0;
+	while (i < packList.packDirs.size())
+	{
+		if (!std::filesystem::exists(packList.packDirsPath[i])) {
+			printf("Error: '%s' Does not exist!\n", packList.packDirs[i].c_str());
+			return false;
+		}
+		if (!std::filesystem::is_directory(packList.packDirsPath[i])) {
+			printf("Error: '%s' Is not a file!\n", packList.packDirs[i].c_str());
+			return false;
+		}
+		packFile->addDirectory(packList.packDirs[i], packList.packDirsPath[i], options);
+		std::cout << "- " << packList.packDirs[i] << std::endl;
+		i++;
+	}
+
+	packFile->bake("", {}, nullptr);
+
+	return true;
+}
 
 int main(int argc, char* argv[])
 {
 	packList_s packList;
 	std::filesystem::path cwd;
 	std::string outputPath;
-	int i;
 
 	cwd = std::filesystem::current_path();
 
@@ -57,7 +142,7 @@ int main(int argc, char* argv[])
 
 	program.add_description(PROGRAM_DESC);
 
-	program.add_epilog("KV Commands:\n" KVCOMMANDHELP);
+	program.add_epilog("KV Commands:\n" KVCOMMANDHELP "\n" SUPPORTEDTYPES);
 
 	try {
 		program.parse_args(argc, argv);
@@ -118,6 +203,19 @@ int main(int argc, char* argv[])
 			packList.version = vpkKey.getValue<int>();
 			continue;
 		}
+		else if (!strcmp(token.c_str(), "$type"))
+		{
+			if (!strcmp(value.c_str(), "zip"))
+				packList.type = zip;
+			else if (!strcmp(value.c_str(), "pak"))
+				packList.type = pak;
+			else {
+				printf("Error: %s is invalid! Must be a supported type.\n", value.c_str());
+				printf(SUPPORTEDTYPES);
+				exit(2);
+			}
+			continue;
+		}
 		else if (!strcmp(token.c_str(), "$pack"))
 		{
 			if (std::filesystem::is_regular_file(pathToKVDir + value))
@@ -153,12 +251,12 @@ int main(int argc, char* argv[])
 	// Make sure there is a name specified
 	if (packList.name == "")
 	{
-		printf("Error: No vpkname specified!\nPlease add $name \"name\" to the kv file\n");
+		printf("Error: No name specified!\nPlease add $name \"name\" to the kv file\n");
 		printf(KVCOMMANDHELP);
 		return 1;
 	}
 
-	if (!packList.name.ends_with("_dir") && packList.singlevpk == false)
+	if (!packList.name.ends_with("_dir") && packList.singlevpk == false && packList.type == vpk)
 		printf(
 			"Warning: multiple vpks being made without _dir suffix!\n\
 			This may cause issues if the vpk is more than 4gb.\n"
@@ -182,51 +280,11 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	std::string packName = outputPath + packList.name + ".vpk";
-	printf("Creating: %s\n", packName.c_str());
-	std::unique_ptr<PackFile> vpkFile = VPK::create(packName, packList.version);
-
-	printf("Packing Files:\n");
-
-	EntryOptions options;
-	options.vpk_saveToDirectory = packList.singlevpk;
-
-	// Iterate through packFiles and packDirs and put them into a vpk
-	i = 0;
-	while (i < packList.packFiles.size())
+	if (!pack(packList, outputPath))
 	{
-		if (!std::filesystem::exists(packList.packFilesPath[i])) {
-			printf("Error: '%s' Does not exist!\n", packList.packFiles[i].c_str());
-			exit(1);
-		}
-		if (!std::filesystem::is_regular_file(packList.packFilesPath[i])) {
-			printf("Error: '%s' Is not a file!\n", packList.packFiles[i].c_str());
-			exit(1);
-		}
-		vpkFile->addEntry(packList.packFiles[i], packList.packFilesPath[i], options);
-		std::cout << "- " << packList.packFiles[i] << std::endl;
-		i++;
+		printf("Error: Packing failed!");
+		return 1;
 	}
-
-	printf("Packing Directories:\n");
-
-	i = 0;
-	while (i < packList.packDirs.size())
-	{
-		if (!std::filesystem::exists(packList.packDirsPath[i])) {
-			printf("Error: '%s' Does not exist!\n", packList.packDirs[i].c_str());
-			exit(1);
-		}
-		if (!std::filesystem::is_directory(packList.packDirsPath[i])) {
-			printf("Error: '%s' Is not a file!\n", packList.packDirs[i].c_str());
-			exit(1);
-		}
-		vpkFile->addDirectory(packList.packDirs[i], packList.packDirsPath[i], options);
-		std::cout << "- " << packList.packDirs[i] << std::endl;
-		i++;
-	}
-
-	vpkFile->bake("", {}, nullptr);
 
 	return 0;
 }
