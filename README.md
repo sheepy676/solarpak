@@ -9,8 +9,7 @@ This was made to easily and quickly package a VPK for easy distribution for a sm
 * zip 
 * pak
   * Quake
-* wad3
-
+  
 ## Dependencies
 - [sourcepp](https://github.com/craftablescience/sourcepp)
 - [argparse](https://github.com/p-ranav/argparse)
