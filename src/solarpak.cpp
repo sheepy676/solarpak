@@ -30,13 +30,13 @@ using namespace fspp;
 #define COMPRESSIONLEVELKEY	"$compresslevel"
 #define COMPRESSIONTYPEKEY	"$compresstype"
 
-enum packType {
+enum packType_e {
 	vpk = 0,
 	zip,
 	pak,
 };
 
-enum zipAlias {
+enum zipAlias_e {
 	none = 0,
 	bmz,
 	pk3,
@@ -47,9 +47,9 @@ struct packList_s {
 	std::string name;
 	std::vector<std::string> packFiles;
 	std::vector<std::string> packFilesPath;
-	packType type = packType::vpk;
+	packType_e type = packType_e::vpk;
 	EntryCompressionType cType = EntryCompressionType::ZSTD;
-	zipAlias zipAlias = zipAlias::none;
+	zipAlias_e zipAlias = zipAlias_e::none;
 	int16_t cLevel = 5;
 	bool singlevpk = false;
 	int version = 1;
@@ -71,6 +71,7 @@ struct packList_s {
 		"vpk [default]\n" \
 		"zip\n" \
 		"pak\n" \
+		"wad3\n"
 
 #define SUPPORTEDZIPALIAS \
 		"Supported ZIP formats:\n" \
@@ -98,28 +99,28 @@ static bool pack(packList_s packList, std::string outputPath)
 
 	switch (packList.type)
 	{
-	case packType::vpk: {
+	case packType_e::vpk: {
 		packName = outputPath + packList.name + vpkpp::VPK_EXTENSION.data();
 		packFile = VPK::create(packName, packList.version);
 		options.vpk_saveToDirectory = packList.singlevpk;
 		break;
 	}
-	case packType::zip: {
+	case packType_e::zip: {
 		// Change zip extension based on defined alias
 		switch (packList.zipAlias) {
-		case zipAlias::none: {
+		case zipAlias_e::none: {
 			packName = outputPath + packList.name + vpkpp::ZIP_EXTENSION.data();
 			break;
 		}
-		case zipAlias::bmz: {
+		case zipAlias_e::bmz: {
 			packName = outputPath + packList.name + vpkpp::BMZ_EXTENSION.data();
 			break;
 		}
-		case zipAlias::pk3: {
+		case zipAlias_e::pk3: {
 			packName = outputPath + packList.name + vpkpp::PK3_EXTENSION.data();
 			break;
 		}
-		case zipAlias::pk4: {
+		case zipAlias_e::pk4: {
 			packName = outputPath + packList.name + vpkpp::PK4_EXTENSION.data();
 			break;
 		}
@@ -129,7 +130,7 @@ static bool pack(packList_s packList, std::string outputPath)
 		options.zip_compressionType = packList.cType;
 		break;
 	}
-	case packType::pak: {
+	case packType_e::pak: {
 		packName = outputPath + packList.name + vpkpp::PAK_EXTENSION.data();
 		packFile = PAK::create(packName, PAK::Type::PAK);
 		break;
@@ -137,7 +138,7 @@ static bool pack(packList_s packList, std::string outputPath)
 	}
 
 	// Error out if compression level is greater than 9 when not using ZSTD as it creates a broken zip
-	if (packList.type = packType::zip)
+	if (packList.type = packType_e::zip)
 		if (packList.cType != EntryCompressionType::ZSTD)
 			if (packList.cLevel > 9) {
 				printf("Error: Compression level is greater than 9. Please use ZSTD\n");
@@ -168,7 +169,7 @@ static bool pack(packList_s packList, std::string outputPath)
 	}
 
 	// If we are packing a zip set the type and strength
-	if (packList.type == packType::zip)
+	if (packList.type == packType_e::zip)
 	{
 		packFile->bake("", {
 			.zip_compressionTypeOverride = packList.cType,
@@ -264,11 +265,11 @@ int main(int argc, char* argv[])
 		else if (!strcmp(token.c_str(), FORMATKEY))
 		{
 			if (!strcmp(value.c_str(), "vpk"))
-				packList.type = packType::vpk;
+				packList.type = packType_e::vpk;
 			else if (!strcmp(value.c_str(), "zip"))
-				packList.type = packType::zip;
+				packList.type = packType_e::zip;
 			else if (!strcmp(value.c_str(), "pak"))
-				packList.type = packType::pak;
+				packList.type = packType_e::pak;
 			else {
 				printf("Error: %s is invalid! Must be a supported type.\n", value.c_str());
 				printf(SUPPORTEDTYPES);
@@ -325,13 +326,13 @@ int main(int argc, char* argv[])
 		else if (!strcmp(token.c_str(), ZIPALIASKEY))
 		{
 			if (!strcmp(value.c_str(), "zip"))
-				packList.zipAlias = zipAlias::none;
+				packList.zipAlias = zipAlias_e::none;
 			else if (!strcmp(value.c_str(), "bmz"))
-				packList.zipAlias = zipAlias::bmz;
+				packList.zipAlias = zipAlias_e::bmz;
 			else if (!strcmp(value.c_str(), "pk3"))
-				packList.zipAlias = zipAlias::pk3;
+				packList.zipAlias = zipAlias_e::pk3;
 			else if (!strcmp(value.c_str(), "pk4"))
-				packList.zipAlias = zipAlias::pk4;
+				packList.zipAlias = zipAlias_e::pk4;
 			else {
 				printf("Error: %s is invalid! Must be a supported type.\n", value.c_str());
 				printf(SUPPORTEDZIPALIAS);
