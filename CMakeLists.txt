@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.31)
 
 project(solarpak
-	VERSION "0.8.0"
+	VERSION "0.9.0"
 	DESCRIPTION "A CLI tool to create a VPK from a kv file."
 )
 set(CMAKE_CXX_STANDARD 20)

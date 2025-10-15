@@ -70,8 +70,7 @@ struct packList_s {
 		"Supported formats:\n" \
 		"vpk [default]\n" \
 		"zip\n" \
-		"pak\n" \
-		"wad3\n"
+		"pak\n"
 
 #define SUPPORTEDZIPALIAS \
 		"Supported ZIP formats:\n" \
