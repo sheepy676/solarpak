@@ -21,36 +21,72 @@ using namespace vpkpp;
 using namespace kvpp;
 using namespace fspp;
 
+#define NAMEKEY				"$name"
+#define PACKKEY				"$pack"
+#define SINGLEVPKKEY		"$singlevpk"
+#define VERSIONKEY			"$version"
+#define FORMATKEY			"$type"
+#define ZIPALIASKEY			"$ziptype"
+#define COMPRESSIONLEVELKEY	"$compresslevel"
+#define COMPRESSIONTYPEKEY	"$compresstype"
+
 enum packType {
 	vpk = 0,
 	zip,
 	pak,
 };
 
+enum zipAlias {
+	none = 0,
+	bmz,
+	pk3,
+	pk4,
+};
+
 struct packList_s {
 	std::string name;
 	std::vector<std::string> packFiles;
 	std::vector<std::string> packFilesPath;
-	std::vector<std::string> packDirs;
-	std::vector<std::string> packDirsPath;
-	packType type = vpk;
+	packType type = packType::vpk;
+	EntryCompressionType cType = EntryCompressionType::ZSTD;
+	zipAlias zipAlias = zipAlias::none;
+	int16_t cLevel = 5;
 	bool singlevpk = false;
 	int version = 1;
 };
 
 #define KVCOMMANDHELP \
 		"Key:			Input:\n" \
-		"$name			[string]\n" \
-		"$singlevpk		[0/1]\n" \
-		"$version		[1/2]\n" \
-		"$pack			[path]\n" \
-		"$type			[format]\n"
+		NAMEKEY "			[string]\n" \
+		SINGLEVPKKEY "		[0/1]\n" \
+		VERSIONKEY "		[1/2]\n" \
+		PACKKEY "			[path]\n" \
+		FORMATKEY "			[format]\n" \
+		ZIPALIASKEY "		[zipformat]\n" \
+		COMPRESSIONLEVELKEY "		[0-22]\n" \
+		COMPRESSIONTYPEKEY "		[type]\n"
 
 #define SUPPORTEDTYPES \
-		"Supported types:\n" \
-		"vpk\n" \
+		"Supported formats:\n" \
+		"vpk [default]\n" \
 		"zip\n" \
-		"pak\n"
+		"pak\n" \
+
+#define SUPPORTEDZIPALIAS \
+		"Supported ZIP formats:\n" \
+		"zip [default]\n" \
+		"bmz\n" \
+		"pk3\n" \
+		"pk4\n"
+
+#define SUPPORTEDCOMPRESSIONTYPES \
+		"Supported Comprsesion types:\n" \
+		"none\n" \
+		"zstd [default]\n" \
+		"deflate\n" \
+		"lzma\n" \
+		"bzip2\n" \
+		"xz\n"
 
 static bool pack(packList_s packList, std::string outputPath)
 {
@@ -62,64 +98,86 @@ static bool pack(packList_s packList, std::string outputPath)
 
 	switch (packList.type)
 	{
-	case vpk: {
+	case packType::vpk: {
 		packName = outputPath + packList.name + vpkpp::VPK_EXTENSION.data();
 		packFile = VPK::create(packName, packList.version);
 		options.vpk_saveToDirectory = packList.singlevpk;
 		break;
 	}
-	case zip: {
-		packName = outputPath + packList.name + vpkpp::ZIP_EXTENSION.data();
+	case packType::zip: {
+		// Change zip extension based on defined alias
+		switch (packList.zipAlias) {
+		case zipAlias::none: {
+			packName = outputPath + packList.name + vpkpp::ZIP_EXTENSION.data();
+			break;
+		}
+		case zipAlias::bmz: {
+			packName = outputPath + packList.name + vpkpp::BMZ_EXTENSION.data();
+			break;
+		}
+		case zipAlias::pk3: {
+			packName = outputPath + packList.name + vpkpp::PK3_EXTENSION.data();
+			break;
+		}
+		case zipAlias::pk4: {
+			packName = outputPath + packList.name + vpkpp::PK4_EXTENSION.data();
+			break;
+		}
+		}
 		packFile = ZIP::create(packName);
+		options.zip_compressionStrength = packList.cLevel;
+		options.zip_compressionType = packList.cType;
 		break;
 	}
-	case pak: {
+	case packType::pak: {
 		packName = outputPath + packList.name + vpkpp::PAK_EXTENSION.data();
 		packFile = PAK::create(packName, PAK::Type::PAK);
 		break;
 	}
 	}
 
+	// Error out if compression level is greater than 9 when not using ZSTD as it creates a broken zip
+	if (packList.type = packType::zip)
+		if (packList.cType != EntryCompressionType::ZSTD)
+			if (packList.cLevel > 9) {
+				printf("Error: Compression level is greater than 9. Please use ZSTD\n");
+				return false;
+			}
+
 
 	printf("Creating: %s\n", packName.c_str());
-	printf("Packing Files:\n");
+	printf("Packing:\n");
 
 	// Iterate through packFiles and packDirs and put them into the type specified
 	i = 0;
 	while (i < packList.packFiles.size())
 	{
-		if (!std::filesystem::exists(packList.packFilesPath[i])) {
-			printf("Error: '%s' Does not exist!\n", packList.packFiles[i].c_str());
-			return false;
+		if (std::filesystem::is_directory(packList.packFilesPath[i])) {
+			packFile->addDirectory(packList.packFiles[i], packList.packFilesPath[i], options);
+			std::cout << "- " << packList.packFiles[i] << std::endl;
 		}
-		if (!std::filesystem::is_regular_file(packList.packFilesPath[i])) {
-			printf("Error: '%s' Is not a file!\n", packList.packFiles[i].c_str());
-			return false;
+		else if (std::filesystem::is_regular_file(packList.packFilesPath[i]))
+		{
+			packFile->addEntry(packList.packFiles[i], packList.packFilesPath[i], options);
+			std::cout << "- " << packList.packFiles[i] << std::endl;
 		}
-		packFile->addEntry(packList.packFiles[i], packList.packFilesPath[i], options);
-		std::cout << "- " << packList.packFiles[i] << std::endl;
+		else 
+			return false;
+
 		i++;
 	}
 
-	printf("Packing Directories:\n");
-
-	i = 0;
-	while (i < packList.packDirs.size())
+	// If we are packing a zip set the type and strength
+	if (packList.type == packType::zip)
 	{
-		if (!std::filesystem::exists(packList.packDirsPath[i])) {
-			printf("Error: '%s' Does not exist!\n", packList.packDirs[i].c_str());
-			return false;
-		}
-		if (!std::filesystem::is_directory(packList.packDirsPath[i])) {
-			printf("Error: '%s' Is not a file!\n", packList.packDirs[i].c_str());
-			return false;
-		}
-		packFile->addDirectory(packList.packDirs[i], packList.packDirsPath[i], options);
-		std::cout << "- " << packList.packDirs[i] << std::endl;
-		i++;
-	}
+		packFile->bake("", {
+			.zip_compressionTypeOverride = packList.cType,
+			.zip_compressionStrength = packList.cLevel
+			}, nullptr);
 
-	packFile->bake("", {}, nullptr);
+	}
+	else
+		packFile->bake("", {}, nullptr);
 
 	return true;
 }
@@ -142,7 +200,7 @@ int main(int argc, char* argv[])
 
 	program.add_description(PROGRAM_DESC);
 
-	program.add_epilog("KV Commands:\n" KVCOMMANDHELP "\n" SUPPORTEDTYPES);
+	program.add_epilog("KV Commands:\n" KVCOMMANDHELP "\n" SUPPORTEDTYPES "\n" SUPPORTEDZIPALIAS "\n" SUPPORTEDCOMPRESSIONTYPES);
 
 	try {
 		program.parse_args(argc, argv);
@@ -151,7 +209,7 @@ int main(int argc, char* argv[])
 	{
 		std::cerr << err.what() << std::endl;
 		std::cerr << program;
-		std::exit(1);
+		exit(1);
 	}
 
 	std::string kvFile{program.get("KVPATH")};
@@ -183,16 +241,16 @@ int main(int argc, char* argv[])
 		std::string token{vpkKey.getKey()};
 		std::string value{vpkKey.getValue()};
 
-		if (!strcmp(token.c_str(), "$name")) {
+		if (!strcmp(token.c_str(), NAMEKEY)) {
 			packList.name = value;
 			continue;
 		}
-		else if (!strcmp(token.c_str(), "$singlevpk"))
+		else if (!strcmp(token.c_str(), SINGLEVPKKEY))
 		{
 			packList.singlevpk = vpkKey.getValue<bool>();
 			continue;
 		}
-		else if (!strcmp(token.c_str(), "$version"))
+		else if (!strcmp(token.c_str(), VERSIONKEY))
 		{
 			// Make sure $version is 1 or 2
 			if (vpkKey.getValue<int>() > 2 || vpkKey.getValue<int>() < 1) {
@@ -203,22 +261,54 @@ int main(int argc, char* argv[])
 			packList.version = vpkKey.getValue<int>();
 			continue;
 		}
-		else if (!strcmp(token.c_str(), "$type"))
+		else if (!strcmp(token.c_str(), FORMATKEY))
 		{
-			if (!strcmp(value.c_str(), "zip"))
-				packList.type = zip;
+			if (!strcmp(value.c_str(), "vpk"))
+				packList.type = packType::vpk;
+			else if (!strcmp(value.c_str(), "zip"))
+				packList.type = packType::zip;
 			else if (!strcmp(value.c_str(), "pak"))
-				packList.type = pak;
+				packList.type = packType::pak;
 			else {
 				printf("Error: %s is invalid! Must be a supported type.\n", value.c_str());
 				printf(SUPPORTEDTYPES);
-				exit(2);
+				exit(3);
 			}
 			continue;
 		}
-		else if (!strcmp(token.c_str(), "$pack"))
+		else if (!strcmp(token.c_str(), COMPRESSIONLEVELKEY))
 		{
-			if (std::filesystem::is_regular_file(pathToKVDir + value))
+			packList.cLevel = vpkKey.getValue<int>();
+		}
+		else if (!strcmp(token.c_str(), COMPRESSIONTYPEKEY))
+		{
+			if (!strcmp(value.c_str(), "none"))
+				packList.cType = EntryCompressionType::NO_COMPRESS;
+			else if (!strcmp(value.c_str(), "deflate"))
+				packList.cType = EntryCompressionType::DEFLATE;
+			else if (!strcmp(value.c_str(), "bzip2"))
+				packList.cType = EntryCompressionType::BZIP2;
+			else if (!strcmp(value.c_str(), "lzma"))
+				packList.cType = EntryCompressionType::LZMA;
+			else if (!strcmp(value.c_str(), "zstd"))
+				packList.cType = EntryCompressionType::ZSTD;
+			else if (!strcmp(value.c_str(), "xz"))
+				packList.cType = EntryCompressionType::XZ;
+			else {
+				printf("Error: %s is invalid! Must be a supported type.\n", value.c_str());
+				printf(SUPPORTEDCOMPRESSIONTYPES);
+				exit(3);
+			}
+		}
+		else if (!strcmp(token.c_str(), PACKKEY))
+		{
+			if (!std::filesystem::exists(pathToKVDir + value)) {
+				printf("Error: '%s' does not exist!\n", value.c_str());
+				exit(1);
+			}
+
+
+			if (std::filesystem::is_regular_file(pathToKVDir + value) || std::filesystem::is_directory(pathToKVDir + value))
 			{
 				auto pos = packList.packFilesPath.begin();
 				auto pos2 = packList.packFiles.begin();
@@ -226,18 +316,26 @@ int main(int argc, char* argv[])
 				packList.packFiles.insert(std::next(pos2, 0),value);
 				continue;
 			}
-			else if (std::filesystem::is_directory(pathToKVDir + value))
-			{
-				auto pos = packList.packDirsPath.begin();
-				auto pos2 = packList.packDirs.begin();
-				packList.packDirsPath.insert(std::next(pos, 0), pathToKVDir + value);
-				packList.packDirs.insert(std::next(pos2, 0), value);
-				continue;
-			}
 			else
 			{
 				printf("Error: %s is not a file or directory!\n", value.c_str());
 				exit(1);
+			}
+		}
+		else if (!strcmp(token.c_str(), ZIPALIASKEY))
+		{
+			if (!strcmp(value.c_str(), "zip"))
+				packList.zipAlias = zipAlias::none;
+			else if (!strcmp(value.c_str(), "bmz"))
+				packList.zipAlias = zipAlias::bmz;
+			else if (!strcmp(value.c_str(), "pk3"))
+				packList.zipAlias = zipAlias::pk3;
+			else if (!strcmp(value.c_str(), "pk4"))
+				packList.zipAlias = zipAlias::pk4;
+			else {
+				printf("Error: %s is invalid! Must be a supported type.\n", value.c_str());
+				printf(SUPPORTEDZIPALIAS);
+				exit(3);
 			}
 		}
 		else

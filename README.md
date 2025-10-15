@@ -6,9 +6,10 @@ This was made to easily and quickly package a VPK for easy distribution for a sm
 ---
 ### Supported pack formats
 * vpk
-* zip
+* zip 
 * pak
   * Quake
+* wad3
 
 ## Dependencies
 - [sourcepp](https://github.com/craftablescience/sourcepp)
@@ -35,3 +36,9 @@ A list of Keys accepted:
 |$version |   [1/2]|
 |$pack | 	  [path]|
 |$type |	  [format]|
+|$ziptype |	  [zipformat]|
+|$compresslevel |	  [0-22]|
+|$compresstype |	  [type]|
+
+> [!NOTE]
+> See program help for supported compression types
