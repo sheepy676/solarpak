@@ -1,10 +1,6 @@
 #include <cstdlib>
 #include <iostream>
-#include <istream>
-#include <fstream>
 #include <string>
-#include <thread>
-#include <algorithm>
 #include <string_view>
 #include <vector>
 
@@ -137,7 +133,7 @@ static bool pack(packList_s packList, std::string outputPath)
 	}
 
 	// Error out if compression level is greater than 9 when not using ZSTD as it creates a broken zip
-	if (packList.type = packType_e::zip)
+	if (packList.type == packType_e::zip)
 		if (packList.cType != EntryCompressionType::ZSTD)
 			if (packList.cLevel > 9) {
 				printf("Error: Compression level is greater than 9. Please use ZSTD\n");
@@ -228,15 +224,13 @@ int main(int argc, char* argv[])
 
 	KV1 kv{ fs::readFileText(kvFile)};
 	if (!kv.hasChild("solarpak")) {
-		printf("Error: `solarpak` root key not found!\n");
+		printf("Error: 'solarpak' root key not found!\n");
 		return 1;
 	}
 
-
-	const auto& aPak = kv["solarpak"];
 	
 	// Get keys from kvfile
-	for (const auto& vpkKey : aPak.getChildren())
+	for (const auto& vpkKey : kv["solarpak"].getChildren())
 	{
 		std::string token{vpkKey.getKey()};
 		std::string value{vpkKey.getValue()};
@@ -254,7 +248,7 @@ int main(int argc, char* argv[])
 		{
 			// Make sure $version is 1 or 2
 			if (vpkKey.getValue<int>() > 2 || vpkKey.getValue<int>() < 1) {
-				printf("Error: $version can't be greater than 2 and less than 1\n");
+				printf("Error: $version can't be 0 or greater than 2\n");
 				exit(1);
 			}
 
