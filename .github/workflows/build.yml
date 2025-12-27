@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "solarpak-windows-${{ matrix.build_type }}"
-          path: ${{ env.BUILDDIR }}/solarpak.exe
+          path: ${{ github.workspace }}/release/solarpak.exe
           retention-days: 3
 
   build-ubuntu:
@@ -72,5 +72,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "solarpak-linux-${{ matrix.build_type }}"
-          path: ${{ env.BUILDDIR }}/solarpak
+          path: ${{ github.workspace }}/release/solarpak
           retention-days: 3

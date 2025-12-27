@@ -7,7 +7,6 @@ project(solarpak
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 set(SOURCEPP_LIBS_START_ENABLED OFF CACHE INTERNAL "" FORCE)
 set(SOURCEPP_USE_KVPP 			 ON CACHE INTERNAL "" FORCE)
 set(SOURCEPP_USE_VPKPP 		  	 ON CACHE INTERNAL "" FORCE)
@@ -32,6 +31,7 @@ configure_file("${CMAKE_SOURCE_DIR}/src/config.h.in" "${CMAKE_SOURCE_DIR}/src/co
 
 add_executable(${PROJECT_NAME}
 	"${CMAKE_SOURCE_DIR}/src/solarpak.cpp"
+	"${CMAKE_SOURCE_DIR}/src/pack.cpp"
 	"${CMAKE_SOURCE_DIR}/src/config.h"
 )
 
@@ -40,6 +40,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 	sourcepp::vpkpp
 	sourcepp::fspp
 	argparse
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/release"
 )
 
 if(MSVC)

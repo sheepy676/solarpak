@@ -1,2 +1,4 @@
 build/
 config.h
+.cache/
+release/
