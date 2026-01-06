@@ -6,7 +6,10 @@ This was made to easily and quickly package a VPK for easy distribution for a sm
 ---
 ### Supported pack formats
 * vpk
-* zip 
+* zip
+  * BMZ
+  * PK3
+  * PK4
 * pak
   * Quake
   
