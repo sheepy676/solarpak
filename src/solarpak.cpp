@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 	}
 	catch (const std::exception& err)
 	{
-		std::cerr << err.what() << std::endl;
+		Common::Error(err.what(), "\n");
 		std::cerr << program;
 		exit(1);
 	}
@@ -65,14 +65,14 @@ int main(int argc, char* argv[])
 	pathToKVDir.append("/");
 
 	if (!std::filesystem::exists(kvFile)) {
-		printf("Error: '%s' Does not exist!\n", kvFile.c_str());
+		Common::Error("Error: '",kvFile.c_str(),"' Does not exist!\n");
 		return 1;
 	}
 		
 
 	KV1 kv{ fs::readFileText(kvFile)};
 	if (!kv.hasChild("solarpak")) {
-		printf("Error: 'solarpak' root key not found!\n");
+		Common::Error("Error: 'solarpak' root key not found!\n");
 		return 1;
 	}
 
@@ -101,8 +101,8 @@ int main(int argc, char* argv[])
 	if (program.is_used("--print-time"))
 		printTime = true;
 	
-	int count = kv["solarpak"].getChildCount();
 	// Get the $pak keys from the kvfile
+	int count = kv["solarpak"].getChildCount("$pak");
 	for (i = 0; i <= count - 1; i++)
 	{
 		parsePack(kv, i, outputPath, pathToKVDir);

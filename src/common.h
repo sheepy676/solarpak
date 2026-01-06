@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 #include <vpkpp/vpkpp.h>
 
 #define NAMEKEY				"$name"
@@ -16,7 +17,6 @@
 
 #define KVCOMMANDHELP \
 		"Key:			Input:\n" \
-		NAMEKEY "			[string]\n" \
 		SINGLEVPKKEY "		[0/1]\n" \
 		VERSIONKEY "		[1/2]\n" \
 		PACKKEY "			[path]\n" \
@@ -45,7 +45,7 @@
 		"deflate\n" \
 		"lzma\n" \
 		"bzip2\n" \
-		"xz\n"
+		"xz"
 
 enum packType_e {
 	vpk = 0,
@@ -74,5 +74,29 @@ struct packList_s {
 
 inline bool verboseMode = false;
 inline bool printTime = false;
+
+
+namespace Common {
+	inline void Error() {
+		std::cerr << std::endl;
+	}
+	inline void Print() {
+		std::cout << std::endl;
+	}
+
+	// Prints to stdcerr
+	template <typename T, typename... Args>
+	inline void Error(T err, Args... args) {
+		std::cerr << err;
+		Error(args...);
+	}
+
+	// Prints to stdcout
+	template <typename T, typename... Args>
+	inline void Print(T fmt, Args... args) {
+		std::cout << fmt;
+		Print(args...);
+	}
+};
 
 #endif // COMMON_H
