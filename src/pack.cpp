@@ -146,6 +146,8 @@ void parsePack(const kvpp::KV1<> kv, int child, std::string pathToKVDir, std::st
 	return;
 error:
 	Common::Error("Error(",name.data(),"): Packing failed!");
+	if(strictMode)
+		exit(1);
 	return;
 }
 

@@ -36,11 +36,18 @@ int main(int argc, char* argv[])
 
 	program.add_argument("-v", "--verbose")
 		.flag()
+		.store_into(verboseMode)
 		.help("Verbose Mode");
 
 	program.add_argument("-p","--print-time")
 		.flag()
+		.store_into(printTime)
 		.help("Prints a time taken measurement after packing");
+
+	program.add_argument("-s", "--strict")
+		.flag()
+		.store_into(strictMode)
+		.help("Makes the program exit on error");
 
 	program.add_description(PROGRAM_DESC);
 
@@ -95,11 +102,6 @@ int main(int argc, char* argv[])
 			exit(1);
 		}
 	}
-
-	if (program.is_used("--verbose"))
-		verboseMode = true;
-	if (program.is_used("--print-time"))
-		printTime = true;
 	
 	// Get the $pak keys from the kvfile
 	int count = kv["solarpak"].getChildCount("$pak");

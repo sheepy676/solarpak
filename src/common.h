@@ -74,7 +74,7 @@ struct packList_s {
 
 inline bool verboseMode = false;
 inline bool printTime = false;
-
+inline bool strictMode = false;
 
 namespace Common {
 	inline void Error() {

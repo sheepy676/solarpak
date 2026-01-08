@@ -57,7 +57,7 @@ Specify VPK output directory:
 
 ## CLI Help:
 ```
-Usage: solarpak [--help] [--version] [--output PATH] [--verbose] [--print-time] KVPATH
+Usage: solarpak [--help] [--version] [--output PATH] [--verbose] [--print-time] [--strict] KVPATH
 
 A CLI tool to create a Package from a kv file.
 
@@ -70,6 +70,7 @@ Optional arguments:
   -o, --output PATH  Specify directory to output VPK to 
   -v, --verbose      Verbose Mode 
   -p, --print-time   Prints a time taken measurement after packing 
+  -s, --strict       Makes the program exit on error 
 
 KV Commands:
 Key:                    Input:
