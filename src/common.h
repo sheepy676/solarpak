@@ -20,7 +20,7 @@
 		"  " VERSIONKEY "		[1/2]\n" \
 		"  " PACKKEY "			[path]\n" \
 		"  " FORMATKEY "			[format]\n" \
-		"  " COMPRESSIONLEVELKEY "		[0-22]\n" \
+		"  " COMPRESSIONLEVELKEY "	[0-22]\n" \
 		"  " COMPRESSIONTYPEKEY "		[type]\n" \
 
 #define SUPPORTEDTYPES \

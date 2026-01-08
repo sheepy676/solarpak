@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 	int count = kv["solarpak"].getChildCount("$pak");
 	for (i = 0; i <= count - 1; i++)
 	{
-		parsePack(kv, i, outputPath, pathToKVDir);
+		parsePack(kv, i, pathToKVDir, outputPath);
 	}
 
 	return 0;
