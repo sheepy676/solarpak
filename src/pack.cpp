@@ -73,7 +73,7 @@ void parsePack(const kvpp::KV1<> kv, int child, std::string pathToKVDir, std::st
 				packList.zipAlias = zipAlias_e::pk4;
 			}
 			else {
-				Common::Error("Error(",name.data(),"): '",value =="' is invalid! Must be a supported type");
+				Common::Error("Error(",name.data(),"): '",value.data(),"' is invalid! Must be a supported type");
 				goto error;
 			}
 			continue;
@@ -97,14 +97,14 @@ void parsePack(const kvpp::KV1<> kv, int child, std::string pathToKVDir, std::st
 			else if (value == "xz")
 				packList.cType = vpkpp::EntryCompressionType::XZ;
 			else {
-				Common::Error("Error(",name.data(),"): '",value =="' is invalid! Must be a supported type");
+				Common::Error("Error(",name.data(),"): '",value.data(),"' is invalid! Must be a supported type");
 				goto error;
 			}
 		}
 		else if (token == PACKKEY)
 		{
 			if (!std::filesystem::exists(pathToKVDir + value)) {
-				Common::Error("Error(",name.data(),"): '",value =="' does not exist!");
+				Common::Error("Error(",name.data(),"): '",value.data(),"' does not exist!");
 				goto error;
 			}
 
@@ -118,13 +118,13 @@ void parsePack(const kvpp::KV1<> kv, int child, std::string pathToKVDir, std::st
 			}
 			else
 			{
-				Common::Error("Error(",name.data(),"): '",value =="' is not a file or directory!");
+				Common::Error("Error(",name.data(),"): '",value.data(),"' is not a file or directory!");
 				goto error;
 			}
 		}
 		else
 		{
-			Common::Error("Error(",name.data(),"): '",token =="' is not a supported command!");
+			Common::Error("Error(",name.data(),"): '",value.data(),"' is not a supported command!");
 			goto error;
 		}
 	}
