@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 
 	program.add_description(PROGRAM_DESC);
 
-	program.add_epilog("KV Commands:\n" KVCOMMANDHELP "\n" SUPPORTEDTYPES "\n" SUPPORTEDZIPALIAS "\n" SUPPORTEDCOMPRESSIONTYPES);
+	program.add_epilog("KV Commands:\n" KVCOMMANDHELP "\n" SUPPORTEDTYPES "\n" SUPPORTEDCOMPRESSIONTYPES);
 
 	try {
 		program.parse_args(argc, argv);

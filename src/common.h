@@ -11,41 +11,36 @@
 #define SINGLEVPKKEY		"$singlevpk"
 #define VERSIONKEY			"$version"
 #define FORMATKEY			"$type"
-#define ZIPALIASKEY			"$ziptype"
 #define COMPRESSIONLEVELKEY	"$compresslevel"
 #define COMPRESSIONTYPEKEY	"$compresstype"
 
 #define KVCOMMANDHELP \
-		"Key:			Input:\n" \
-		SINGLEVPKKEY "		[0/1]\n" \
-		VERSIONKEY "		[1/2]\n" \
-		PACKKEY "			[path]\n" \
-		FORMATKEY "			[format]\n" \
-		ZIPALIASKEY "		[zipformat]\n" \
-		COMPRESSIONLEVELKEY "		[0-22]\n" \
-		COMPRESSIONTYPEKEY "		[type]\n"
+		"  " "Key:			Input:\n" \
+		"  " SINGLEVPKKEY "		[0/1]\n" \
+		"  " VERSIONKEY "		[1/2]\n" \
+		"  " PACKKEY "			[path]\n" \
+		"  " FORMATKEY "			[format]\n" \
+		"  " COMPRESSIONLEVELKEY "		[0-22]\n" \
+		"  " COMPRESSIONTYPEKEY "		[type]\n" \
 
 #define SUPPORTEDTYPES \
 		"Supported formats:\n" \
-		"vpk [default]\n" \
-		"zip\n" \
-		"pak\n"
-
-#define SUPPORTEDZIPALIAS \
-		"Supported ZIP formats:\n" \
-		"zip [default]\n" \
-		"bmz\n" \
-		"pk3\n" \
-		"pk4\n"
+		"  vpk [default]\n" \
+		"  zip\n" \
+		"  pak\n" \
+		"  bmz\n" \
+		"  pk2\n" \
+		"  pk3\n" \
+		"  pk4\n" \
 
 #define SUPPORTEDCOMPRESSIONTYPES \
 		"Supported Comprsesion types:\n" \
-		"none\n" \
-		"zstd [default]\n" \
-		"deflate\n" \
-		"lzma\n" \
-		"bzip2\n" \
-		"xz"
+		"  none\n" \
+		"  zstd [default]\n" \
+		"  deflate\n" \
+		"  lzma\n" \
+		"  bzip2\n" \
+		"  xz" \
 
 enum packType_e {
 	vpk = 0,
@@ -58,6 +53,7 @@ enum zipAlias_e {
 	bmz,
 	pk3,
 	pk4,
+	pk2,
 };
 
 struct packList_s {

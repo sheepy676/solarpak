@@ -50,10 +50,28 @@ void parsePack(const kvpp::KV1<> kv, int child, std::string pathToKVDir, std::st
 		{
 			if (value == "vpk")
 				packList.type = packType_e::vpk;
-			else if (value == "zip")
-				packList.type = packType_e::zip;
 			else if (value == "pak")
 				packList.type = packType_e::pak;
+			else if (value == "zip") {
+				packList.type = packType_e::zip;
+				packList.zipAlias = zipAlias_e::none;
+			}
+			else if (value == "bmz") {
+				packList.type = packType_e::zip;
+				packList.zipAlias = zipAlias_e::bmz;
+			}
+			else if (value == "pk2") {
+				packList.type = packType_e::zip;
+				packList.zipAlias = zipAlias_e::pk2;
+			}
+			else if (value == "pk3") {
+				packList.type = packType_e::zip;
+				packList.zipAlias = zipAlias_e::pk3;
+			}
+			else if (value == "pk4") {
+				packList.type = packType_e::zip;
+				packList.zipAlias = zipAlias_e::pk4;
+			}
 			else {
 				Common::Error("Error(",name.data(),"): '",value =="' is invalid! Must be a supported type");
 				goto error;
@@ -101,21 +119,6 @@ void parsePack(const kvpp::KV1<> kv, int child, std::string pathToKVDir, std::st
 			else
 			{
 				Common::Error("Error(",name.data(),"): '",value =="' is not a file or directory!");
-				goto error;
-			}
-		}
-		else if (token == ZIPALIASKEY)
-		{
-			if (value == "zip")
-				packList.zipAlias = zipAlias_e::none;
-			else if (value == "bmz")
-				packList.zipAlias = zipAlias_e::bmz;
-			else if (value == "pk3")
-				packList.zipAlias = zipAlias_e::pk3;
-			else if (value == "pk4")
-				packList.zipAlias = zipAlias_e::pk4;
-			else {
-				Common::Error("Error(",name.data(),"): '",value =="' is invalid! Must be a supported type");
 				goto error;
 			}
 		}
@@ -185,6 +188,9 @@ bool pack(packList_s packList, std::string outputPath)
 			break;
 		case zipAlias_e::pk4:
 			packName = outputPath + packList.name + vpkpp::PK4_EXTENSION.data();
+			break;
+		case zipAlias_e::pk2:
+			packName = outputPath + packList.name + ".pk2";
 			break;
 		}
 		packFile = vpkpp::ZIP::create(packName);

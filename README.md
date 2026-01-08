@@ -51,7 +51,6 @@ Specify VPK output directory:
 |$version |   [1/2]|Sets the version of a VPK|
 |$pack | 	  [path]|File/DIR to pack|
 |$type |	  [format]|Sets the type of pack to make|
-|$ziptype |	  [zipformat]|Sets the kind of ZIP to make|
 |$compresslevel |	  [0-22]|Sets the level of compression of a ZIP|
 |$compresstype |	  [type]|Sets the compression method to use for a ZIP|
 
@@ -73,31 +72,28 @@ Optional arguments:
   -s, --strict       Makes the program exit on error 
 
 KV Commands:
-Key:                    Input:
-$singlevpk              [0/1]
-$version                [1/2]
-$pack                   [path]
-$type                   [format]
-$ziptype                [zipformat]
-$compresslevel          [0-22]
-$compresstype           [type]
+  Key:                    Input:
+  $singlevpk              [0/1]
+  $version                [1/2]
+  $pack                   [path]
+  $type                   [format]
+  $compresslevel          [0-22]
+  $compresstype           [type]
 
 Supported formats:
-vpk [default]
-zip
-pak
-
-Supported ZIP formats:
-zip [default]
-bmz
-pk3
-pk4
+  vpk [default]
+  zip
+  pak
+  bmz
+  pk2
+  pk3
+  pk4
 
 Supported Comprsesion types:
-none
-zstd [default]
-deflate
-lzma
-bzip2
-xz
+  none
+  zstd [default]
+  deflate
+  lzma
+  bzip2
+  xz
 ```
