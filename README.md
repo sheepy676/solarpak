@@ -8,6 +8,7 @@ This was made to easily and quickly package a VPK for easy distribution for a sm
 * vpk
 * zip
   * BMZ
+  * PK2
   * PK3
   * PK4
 * pak
@@ -19,6 +20,7 @@ This was made to easily and quickly package a VPK for easy distribution for a sm
 
 ## Usage
 ### Example KV file
+This example would create a zip archive named example using ZSTD compression and packs in the `materials` and `models` directories and `image.png`.
 ```
 solarpak
 {
@@ -36,12 +38,12 @@ solarpak
 
 ### Example command usage
 Basic Usage:
-```shell
-./solarpak ./example.kv
+```bash
+$ solarpak ./example.kv
 ```
 Specify VPK output directory:
-```shell
-./solarpak -o ./output ./example.kv
+```bash
+$ solarpak -o ./output ./example.kv
 ```
 
 ### A list of Keys accepted:
