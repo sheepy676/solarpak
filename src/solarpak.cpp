@@ -8,14 +8,13 @@
 #include "pack.h"
 
 #include <kvpp/KV1.h>
-#include <fspp/fspp.h>
+#include <sourcepp/FS.h>
 
 #include <argparse/argparse.hpp>
 
 using namespace sourcepp;
 using namespace vpkpp;
 using namespace kvpp;
-using namespace fspp;
 
 
 int main(int argc, char* argv[])
