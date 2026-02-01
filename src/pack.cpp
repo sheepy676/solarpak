@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string>
 #include <filesystem>
-#include <pthread.h>
 #include <chrono>
 
 #include "pack.h"
