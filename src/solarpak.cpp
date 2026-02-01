@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 	}
 
 
-	outputPath = std::filesystem::current_path();
+	outputPath = std::filesystem::current_path().string();
 	outputPath.append("/");
 
 	// Get and Set output path
