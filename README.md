@@ -4,7 +4,7 @@ A CLI tool to create a VPK from a kv file.
 This was made to easily and quickly package a VPK for easy distribution for a small Alien Swarm: Reactive Drop workshop campaign I am working on. I decided to relase it in-case others find it useful.
 
 ---
-### Supported pack formats
+### Supported formats
 * vpk
 * zip
   * BMZ
@@ -39,11 +39,11 @@ solarpak
 ### Example command usage
 Basic Usage:
 ```bash
-$ solarpak ./example.kv
+solarpak ./example.kv
 ```
 Specify VPK output directory:
 ```bash
-$ solarpak -o ./output ./example.kv
+solarpak -o ./output ./example.kv
 ```
 
 ### A list of Keys accepted:
